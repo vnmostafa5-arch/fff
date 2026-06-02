@@ -28,25 +28,25 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. بنحمل الـ jar الناقص زي المرة اللي فاتت
+      # 3. تحميل ملف gradle-wrapper.jar المتوافق مع إصدار 8.10 تلقائياً
       - name: Download missing gradle-wrapper.jar
         run: |
           mkdir -p gradle/wrapper
-          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
+          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.10.0/gradle/wrapper/gradle-wrapper.jar
 
-      # 4. التعديل الجديد: استخدام الأكشن الرسمي لـ Gradle لتجنب مشاكل الشبكة والتحميل
+      # 4. إعداد الـ Gradle Action الرسمي
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 5. نديه صلاحية التشغيل
+      # 5. صلاحية التشغيل
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 6. نبني المود
+      # 6. بناء المود
       - name: Build mod
         run: ./gradlew build --no-daemon
 
-      # 7. نرفع الـ JAR كـ artifact دايماً
+      # 7. رفع الـ JAR النهائي
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -54,7 +54,6 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
-  # Release تلقائي لما تعمل tag بيبدأ بـ v
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -76,9 +75,8 @@ jobs:
       - name: Download missing gradle-wrapper.jar
         run: |
           mkdir -p gradle/wrapper
-          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
+          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.10.0/gradle/wrapper/gradle-wrapper.jar
 
-      # إعداد Gradle في مرحلة الـ Release أيضاً لمنع الإيرور
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -88,7 +86,6 @@ jobs:
       - name: Build mod
         run: ./gradlew build --no-daemon
 
-      # ننشر GitHub Release مع الـ JAR
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -96,12 +93,6 @@ jobs:
           name: "TestMod ${{ github.ref_name }}"
           body: |
             ## TestMod ${{ github.ref_name }}
-            
             مود يحسب الساعات والدقائق منذ بدء العالم 🕐
-            
-            ### متمتطلبات التشغيل
-            - Minecraft Java Edition **26.1.2**
-            - Fabric Loader **0.18.4+**
-            - Fabric API **0.149.1+26.1.2**
           draft: false
           prerelease: false
