@@ -21,30 +21,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. نثبت Java 25 (مطلوب لـ MC 26.1.2)
-      - name: Set up Java 25
+      # 2. نثبت جافا 25 أولاً (عشان الجرادل يلاقيها لما يحتاجها للمود)
+      - name: Set up Java 25 (For Mod)
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. الحل الجديد: توليد ملف الـ Wrapper الأصلي السليم تماماً باستخدام Gradle المثبت في السيرفر
+      # 3. نثبت جافا 21 ثانياً (عشان تكون هي النسخة النشطة اللي الجرادل بيشتغل عليها)
+      - name: Set up Java 21 (For Gradle Runtime)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 4. توليد ملف الـ Wrapper الأصلي السليم تماماً
       - name: Generate Valid Gradle Wrapper
         run: gradle wrapper --gradle-version 8.10
 
-      # 4. إعداد الـ Gradle Action الرسمي
+      # 5. إعداد الـ Gradle Action الرسمي
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 5. إعطاء صلاحية التشغيل
+      # 6. إعطاء صلاحية التشغيل
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 6. بناء المود
+      # 7. بناء المود
       - name: Build mod
         run: ./gradlew build --no-daemon
 
-      # 7. رفع الـ JAR النهائي كـ Artifact
+      # 8. رفع الـ JAR النهائي كـ Artifact
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -64,13 +71,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 25
+      - name: Set up Java 25 (For Mod)
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      # توليد الـ Wrapper السليم في مرحلة الـ Release أيضاً
+      - name: Set up Java 21 (For Gradle Runtime)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Generate Valid Gradle Wrapper
         run: gradle wrapper --gradle-version 8.10
 
