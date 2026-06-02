@@ -45,8 +45,10 @@ tasks.withType(JavaCompile).configureEach {
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    // هنا بنقول لجرادل استخدم جافا 25 لبناء المود حتى لو جرادل شغال بجافا أقل
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
 jar {
