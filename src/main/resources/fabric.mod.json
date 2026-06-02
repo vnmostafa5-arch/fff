@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "testmod",
+  "version": "${version}",
+  "name": "Test Mod",
+  "description": "يحسب الساعات والدقائق منذ بدء العالم",
+  "authors": ["You"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.example.testmod.TestMod"
+    ],
+    "client": [
+      "com.example.testmod.client.TestModClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~26.1",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
