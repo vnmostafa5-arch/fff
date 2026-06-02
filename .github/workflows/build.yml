@@ -39,6 +39,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      # خطوة جديدة: تحميل ملف gradle-wrapper.jar الناقص تلقائياً للسيرفر
+      - name: Download missing gradle-wrapper.jar
+        run: |
+          mkdir -p gradle/wrapper
+          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
+
       # 4. نديه صلاحية التشغيل
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -83,6 +89,12 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      # خطوة جديدة: تحميل ملف gradle-wrapper.jar الناقص تلقائياً في مرحلة الـ Release أيضاً
+      - name: Download missing gradle-wrapper.jar
+        run: |
+          mkdir -p gradle/wrapper
+          curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
