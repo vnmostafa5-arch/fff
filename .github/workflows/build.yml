@@ -21,26 +21,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. تثبيت Java 25 (المطلوبة والأساسية لإصدار ماين كرافت 26.1.2)
+      # 2. تثبيت Java 25 (المطلوبة لإصدار ماين كرافت 26.1.2)
       - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. خطوة الأمان القصوى: تثبيت Gradle 9.2 رسمي ومضمون مباشرة في السيرفر
-      # هذه الخطوة تتجاهل تماماً ملفات الـ wrapper التالفة أو روابط الـ 404
-      - name: Setup Gradle 9.2 (Bulletproof Setup)
+      # 3. تثبيت Gradle 9.4 رسمي ومضمون مباشرة في السيرفر
+      # تم اختيار 9.4 لأنه متوافق تماماً وموجود في قاعدة بيانات جيت هب ويغطي شرط الـ Loom (أعلى من 9.2)
+      - name: Setup Gradle 9.4 (Bulletproof Setup)
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.2'
-          cache-disabled: false # تفعيل الكاش السريع لتسريع عمليات البناء القادمة
+          gradle-version: '9.4'
+          cache-disabled: false
 
-      # 4. بناء المود باستخدام نسخة Gradle 9.2 المثبتة عالمياً بالسيرفر
-      - name: Build mod with Global Gradle 9.2
+      # 4. بناء المود باستخدام نسخة Gradle 9.4 المثبتة بالسيرفر
+      - name: Build mod with Global Gradle 9.4
         run: gradle build --no-daemon
 
-      # 5. رفع ملف الـ JAR النهائي الناتج عن البناء بنجاح
+      # 5. رفع ملف الـ JAR النهائي الناتج عن البناء
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -57,28 +57,24 @@ jobs:
       contents: write
 
     steps:
-      # 1. تحميل الكود لمرحلة الـ Release
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. تثبيت جافا 25 للـ Release
       - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. تثبيت نفس نسخة جرادل 9.2 المضمونة للـ Release
-      - name: Setup Gradle 9.2 (Bulletproof Setup)
+      - name: Setup Gradle 9.4 (Bulletproof Setup)
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.2'
+          gradle-version: '9.4'
 
-      # 4. عمل بيلد نهائي لملف الـ Release
-      - name: Build mod with Global Gradle 9.2
+      - name: Build mod with Global Gradle 9.4
         run: gradle build --no-daemon
 
-      # 5. إنشاء الـ GitHub Release ونشر المود للعامة تلقائياً عند وضع Tag
+      # إنشاء الـ GitHub Release ونشر المود تلقائياً
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
