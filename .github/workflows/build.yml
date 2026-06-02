@@ -17,41 +17,30 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. نحمل كود المود
+      # 1. تحميل كود المود من المستودع
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. نثبت جافا 25 أولاً (عشان الجرادل يلاقيها لما يحتاجها للمود)
-      - name: Set up Java 25 (For Mod)
+      # 2. تثبيت Java 25 (المطلوبة والأساسية لإصدار ماين كرافت 26.1.2)
+      - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. نثبت جافا 21 ثانياً (عشان تكون هي النسخة النشطة اللي الجرادل بيشتغل عليها)
-      - name: Set up Java 21 (For Gradle Runtime)
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      # 4. توليد ملف الـ Wrapper الأصلي السليم تماماً
-      - name: Generate Valid Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.10
-
-      # 5. إعداد الـ Gradle Action الرسمي
-      - name: Setup Gradle
+      # 3. خطوة الأمان القصوى: تثبيت Gradle 9.2 رسمي ومضمون مباشرة في السيرفر
+      # هذه الخطوة تتجاهل تماماً ملفات الـ wrapper التالفة أو روابط الـ 404
+      - name: Setup Gradle 9.2 (Bulletproof Setup)
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2'
+          cache-disabled: false # تفعيل الكاش السريع لتسريع عمليات البناء القادمة
 
-      # 6. إعطاء صلاحية التشغيل
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # 4. بناء المود باستخدام نسخة Gradle 9.2 المثبتة عالمياً بالسيرفر
+      - name: Build mod with Global Gradle 9.2
+        run: gradle build --no-daemon
 
-      # 7. بناء المود
-      - name: Build mod
-        run: ./gradlew build --no-daemon
-
-      # 8. رفع الـ JAR النهائي كـ Artifact
+      # 5. رفع ملف الـ JAR النهائي الناتج عن البناء بنجاح
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -68,41 +57,40 @@ jobs:
       contents: write
 
     steps:
+      # 1. تحميل الكود لمرحلة الـ Release
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 25 (For Mod)
+      # 2. تثبيت جافا 25 للـ Release
+      - name: Set up Java 25
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
 
-      - name: Set up Java 21 (For Gradle Runtime)
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Generate Valid Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.10
-
-      - name: Setup Gradle
+      # 3. تثبيت نفس نسخة جرادل 9.2 المضمونة للـ Release
+      - name: Setup Gradle 9.2 (Bulletproof Setup)
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # 4. عمل بيلد نهائي لملف الـ Release
+      - name: Build mod with Global Gradle 9.2
+        run: gradle build --no-daemon
 
-      - name: Build mod
-        run: ./gradlew build --no-daemon
-
-      # نشر الـ Release على جيت هب
+      # 5. إنشاء الـ GitHub Release ونشر المود للعامة تلقائياً عند وضع Tag
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: build/libs/*.jar
           name: "TestMod ${{ github.ref_name }}"
           body: |
-            ## TestMod ${{ github.ref_name }}
+            ## TestMod ${{ github.ref_name }} 🎉
             مود يحسب الساعات والدقائق منذ بدء العالم 🕐
+            
+            ### متطلبات التشغيل:
+            - Minecraft Java Edition **26.1.2**
+            - Fabric Loader
+            - Java 25
           draft: false
           prerelease: false
