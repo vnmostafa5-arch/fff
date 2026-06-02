@@ -28,32 +28,25 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
 
-      # 3. Cache لـ Gradle عشان البيلد يكون أسرع
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # خطوة جديدة: تحميل ملف gradle-wrapper.jar الناقص تلقائياً للسيرفر
+      # 3. بنحمل الـ jar الناقص زي المرة اللي فاتت
       - name: Download missing gradle-wrapper.jar
         run: |
           mkdir -p gradle/wrapper
           curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
 
-      # 4. نديه صلاحية التشغيل
+      # 4. التعديل الجديد: استخدام الأكشن الرسمي لـ Gradle لتجنب مشاكل الشبكة والتحميل
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # 5. نديه صلاحية التشغيل
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 5. نبني المود
+      # 6. نبني المود
       - name: Build mod
         run: ./gradlew build --no-daemon
 
-      # 6. نرفع الـ JAR كـ artifact دايماً
+      # 7. نرفع الـ JAR كـ artifact دايماً
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -80,21 +73,14 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      # خطوة جديدة: تحميل ملف gradle-wrapper.jar الناقص تلقائياً في مرحلة الـ Release أيضاً
       - name: Download missing gradle-wrapper.jar
         run: |
           mkdir -p gradle/wrapper
           curl -Lo gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v9.4.0/gradle/wrapper/gradle-wrapper.jar
+
+      # إعداد Gradle في مرحلة الـ Release أيضاً لمنع الإيرور
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -113,7 +99,7 @@ jobs:
             
             مود يحسب الساعات والدقائق منذ بدء العالم 🕐
             
-            ### متطلبات التشغيل
+            ### متمتطلبات التشغيل
             - Minecraft Java Edition **26.1.2**
             - Fabric Loader **0.18.4+**
             - Fabric API **0.149.1+26.1.2**
